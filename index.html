@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Producción de Hidrógeno Verde por Electrólisis</title>
+
+<style>
+:root{
+    --blue:#1769e0;
+    --dark:#12305f;
+    --green:#16a765;
+    --green-light:#e9f9f1;
+    --blue-light:#eef6ff;
+    --border:#cfe1f5;
+    --text:#183153;
+    --muted:#66788f;
+    --bg:#f4f8fc;
+    --white:#ffffff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+
+.header{
+    background:linear-gradient(120deg,#10294f,#215da8);
+    color:white;
+    padding:24px 5%;
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.logo{
+    width:58px;height:58px;border-radius:50%;
+    background:#35d45d;
+    display:flex;align-items:center;justify-content:center;
+    font-size:32px;
+}
+
+.header h1{font-size:28px}
+.header p{margin-top:5px;color:#dbe9ff}
+.badge{
+    margin-left:auto;
+    border:1px solid #9db8dc;
+    padding:8px 15px;border-radius:20px;
+    font-weight:bold;
+}
+
+.container{
+    max-width:1450px;
+    margin:20px auto;
+    padding:0 20px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:390px 1fr;
+    gap:18px;
+}
+
+.card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 4px 15px rgba(20,60,100,.06);
+}
+
+.card h2{
+    font-size:20px;
+    margin-bottom:18px;
+    color:var(--dark);
+}
+
+.section{
+    padding:17px 0;
+    border-top:1px solid #e2ebf5;
+}
+
+.section:first-of-type{border-top:0}
+
+label{
+    display:block;
+    font-weight:bold;
+    font-size:14px;
+    margin-bottom:7px;
+}
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.input-wrap{position:relative}
+
+input[type=number]{
+    width:100%;
+    padding:12px 55px 12px 12px;
+    border:1px solid #b9cde3;
+    border-radius:8px;
+    font-size:16px;
+}
+
+.unit{
+    position:absolute;
+    right:12px;
+    top:12px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.total-power{
+    margin-top:14px;
+    padding:13px;
+    background:var(--green-light);
+    border:1px solid #bcebd1;
+    border-radius:9px;
+    color:#087a46;
+}
+
+.total-power strong{
+    display:block;
+    font-size:23px;
+    margin-top:3px;
+}
+
+.sublabel{
+    font-weight:normal;
+    font-size:13px;
+    color:var(--muted);
+}
+
+.sub-note{
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.4;
+    padding-bottom:12px;
+    text-align:right;
+}
+
+.sub-note strong{
+    color:var(--text);
+    font-size:14px;
+}
+
+.solar-total{
+    background:#fff8ea;
+    border-color:#f3dfa4;
+    color:#8a6a10;
+}
+
+.wind-total{
+    background:var(--blue-light);
+    border-color:#c8def8;
+    color:#1c4d85;
+}
+
+.info{
+    background:var(--blue-light);
+    border:1px solid #c8def8;
+    border-radius:8px;
+    padding:11px;
+    font-size:13px;
+    color:#3b5f87;
+    line-height:1.45;
+    margin-top:12px;
+}
+
+.radio{
+    display:flex;
+    gap:9px;
+    align-items:flex-start;
+    margin:12px 0;
+    font-size:13px;
+}
+
+.radio input{
+    margin-top:2px;
+}
+
+button{
+    width:100%;
+    border:0;
+    border-radius:9px;
+    padding:14px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.calculate{
+    background:var(--blue);
+    color:white;
+}
+
+.calculate:hover{background:#0f58c3}
+
+.clear{
+    margin-top:9px;
+    background:#f1f5fa;
+    color:#315170;
+    border:1px solid #cbdbea;
+}
+
+.right{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.process{
+    overflow:hidden;
+}
+
+.process-area{
+    position:relative;
+    min-height:310px;
+    background:linear-gradient(135deg,#eef8ff,#f7fcff);
+    border-radius:13px;
+    border:1px solid #d8e9f8;
+    padding:28px;
+    display:grid;
+    grid-template-columns:1fr 1.2fr 1fr;
+    align-items:center;
+    gap:18px;
+}
+
+.source{
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+}
+
+.source-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.icon{
+    width:52px;height:52px;
+    border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:27px;
+    background:white;
+    border:1px solid #cde0f3;
+}
+
+.source-item strong{display:block}
+.source-item small{color:var(--muted)}
+
+.energy-box{
+    text-align:center;
+    background:var(--green-light);
+    border:2px solid #bdebd1;
+    border-radius:14px;
+    padding:22px 12px;
+}
+
+.energy-box .big{
+    font-size:30px;
+    font-weight:bold;
+    color:#0c8750;
+    margin-top:7px;
+}
+
+.electrolyzer{
+    position:relative;
+    background:white;
+    border:2px solid #9ebbd8;
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+}
+
+.electrolyzer-title{
+    font-weight:bold;
+    margin-bottom:12px;
+}
+
+.tanks{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.tank{
+    width:55px;height:100px;
+    border-radius:8px 8px 13px 13px;
+    border:2px solid #6f91b4;
+    background:linear-gradient(to top,#1885eb 75%,#e5f4ff 75%);
+}
+
+.tank.o2{
+    background:linear-gradient(to top,#8ba0b7 55%,#edf2f7 55%);
+}
+
+.water{margin-top:12px;font-size:13px}
+
+.gases{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.gas{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-weight:bold;
+}
+
+.gas-bubble{
+    width:52px;height:52px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:#e9f5ff;color:#126bd3;
+    font-size:18px;
+}
+
+.gas.o2 .gas-bubble{
+    background:#edf1f5;color:#60748a;
+}
+
+.arrow{
+    position:absolute;
+    height:4px;
+    background:var(--green);
+    width:90px;
+    top:50%;
+    transform:translateY(-50%);
+    animation:pulse 1.3s infinite;
+}
+
+.arrow.a1{left:27%}
+.arrow.a2{right:26%}
+
+@keyframes pulse{
+    0%,100%{opacity:.45}
+    50%{opacity:1}
+}
+
+.status{
+    margin-top:15px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.dot{
+    width:14px;height:14px;border-radius:50%;
+    background:#b8c3cf;
+}
+
+.dot.active{
+    background:#13aa67;
+    box-shadow:0 0 0 5px #d8f6e7;
+}
+
+.progress{
+    margin-top:12px;
+    height:11px;
+    background:#dce5ee;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#15a967,#27cf7b);
+    transition:width .7s ease;
+}
+
+.results-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+}
+
+.metric{
+    border:1px solid #cfe3f8;
+    border-radius:11px;
+    padding:17px;
+    background:#fbfdff;
+}
+
+.metric .label{
+    color:#406486;
+    font-size:13px;
+}
+
+.metric .number{
+    font-size:25px;
+    font-weight:bold;
+    color:var(--dark);
+    margin-top:8px;
+}
+
+.metric small{
+    color:var(--muted);
+}
+
+.success{
+    margin-top:14px;
+    background:var(--green-light);
+    border:1px solid #bcebd1;
+    color:#087746;
+    border-radius:9px;
+    padding:13px;
+    font-size:14px;
+}
+
+.formula{
+    margin-top:15px;
+    background:#f5f8fb;
+    border-radius:9px;
+    padding:14px;
+    font-family:monospace;
+    text-align:center;
+    color:#294a69;
+}
+
+.footer-card{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:20px;
+}
+
+.footer-card h3{font-size:14px;margin-bottom:7px}
+.footer-card p{font-size:12px;color:var(--muted);line-height:1.5}
+
+@media(max-width:1000px){
+    .grid{grid-template-columns:1fr}
+    .process-area{grid-template-columns:1fr}
+    .arrow{display:none}
+    .results-grid{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:600px){
+    .header{padding:18px}
+    .header h1{font-size:21px}
+    .badge{display:none}
+    .container{padding:0 10px}
+    .row{grid-template-columns:1fr}
+    .results-grid{grid-template-columns:1fr}
+    .footer-card{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="logo">⚡</div>
+    <div>
+        <h1>Producción de Hidrógeno Verde</h1>
+        <p>por Electrólisis · Conversión de energía renovable en H₂</p>
+    </div>
+    <div class="badge">Alpha v1.0</div>
+</header>
+
+<main class="container">
+
+<div class="grid">
+
+<!-- PANEL DE ENTRADAS -->
+<section class="card">
+
+    <h2>⚙️ Parámetros de entrada</h2>
+
+    <div class="section">
+        <label>☀️ Banco solar</label>
+
+        <div class="row">
+            <div>
+                <label for="panelWp" class="sublabel">Potencia por panel</label>
+                <div class="input-wrap">
+                    <input id="panelWp" type="number" min="0" step="1" value="450">
+                    <span class="unit">Wp</span>
+                </div>
+            </div>
+
+            <div>
+                <label for="panelCount" class="sublabel">N.º de paneles</label>
+                <div class="input-wrap">
+                    <input id="panelCount" type="number" min="0" step="1" value="20">
+                    <span class="unit">u.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;align-items:end;">
+            <div>
+                <label for="panelPR" class="sublabel">Factor de rendimiento (PR)</label>
+                <div class="input-wrap">
+                    <input id="panelPR" type="number" min="1" max="100" step="1" value="80">
+                    <span class="unit">%</span>
+                </div>
+            </div>
+            <div class="sub-note">
+                Pico instalado<br><strong><span id="panelPico">9.0</span> kWp</strong>
+            </div>
+        </div>
+
+        <div class="info">
+            El factor de rendimiento (PR) resume las pérdidas del sistema:
+            temperatura, cableado, suciedad e inversor.
+        </div>
+
+        <div class="total-power solar-total">
+            Potencia solar total (ajustada)
+            <strong><span id="solarTotal">7.2</span> kW</strong>
+        </div>
+    </div>
+
+    <div class="section">
+        <label>🌬️ Granja eólica</label>
+
+        <div class="row">
+            <div>
+                <label for="turbineKw" class="sublabel">Potencia por aerogenerador</label>
+                <div class="input-wrap">
+                    <input id="turbineKw" type="number" min="0" step="1" value="100">
+                    <span class="unit">kW</span>
+                </div>
+            </div>
+
+            <div>
+                <label for="turbineCount" class="sublabel">N.º de aerogeneradores</label>
+                <div class="input-wrap">
+                    <input id="turbineCount" type="number" min="0" step="1" value="3">
+                    <span class="unit">u.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;align-items:end;">
+            <div>
+                <label for="turbineCF" class="sublabel">Factor de capacidad</label>
+                <div class="input-wrap">
+                    <input id="turbineCF" type="number" min="1" max="100" step="1" value="35">
+                    <span class="unit">%</span>
+                </div>
+            </div>
+            <div class="sub-note">
+                Nominal instalada<br><strong><span id="turbineNominal">300.0</span> kW</strong>
+            </div>
+        </div>
+
+        <div class="info">
+            El factor de capacidad refleja cuánto de la potencia nominal
+            se aprovecha en promedio según el recurso eólico del sitio.
+        </div>
+
+        <div class="total-power wind-total">
+            Potencia eólica total (ajustada)
+            <strong><span id="eolicaTotal">105.0</span> kW</strong>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="total-power">
+            Potencia renovable total
+            <strong><span id="potenciaTotal">112.2</span> kW</strong>
+        </div>
+    </div>
+
+    <div class="section">
+        <label for="horas">⏱️ Horas de operación</label>
+        <div class="input-wrap">
+            <input id="horas" type="number" min="0" step="0.1" value="8">
+            <span class="unit">h</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <label for="consumo">⚙️ Consumo específico del electrolizador</label>
+        <div class="input-wrap">
+            <input id="consumo" type="number" min="0.1" step="0.1" value="50">
+            <span class="unit">kWh/kg</span>
+        </div>
+
+        <div class="info">
+            <strong>Importante:</strong> el consumo específico puede incluir
+            o no la eficiencia del electrolizador. Selecciona la opción
+            correspondiente para evitar descontar la eficiencia dos veces.
+        </div>
+
+        <label style="margin-top:15px;">¿El consumo específico incluye la eficiencia?</label>
+
+        <label class="radio">
+            <input type="radio" name="incluye" value="si" checked>
+            <span>
+                <strong>Sí, ya incluye la eficiencia</strong><br>
+                No se aplica una corrección adicional.
+            </span>
+        </label>
+
+        <label class="radio">
+            <input type="radio" name="incluye" value="no">
+            <span>
+                <strong>No, no incluye la eficiencia</strong><br>
+                Se aplicará la eficiencia ingresada.
+            </span>
+        </label>
+    </div>
+
+    <div class="section">
+        <label for="eficiencia">🛡️ Eficiencia del electrolizador</label>
+        <div class="input-wrap">
+            <input id="eficiencia" type="number" min="1" max="100" step="1" value="70">
+            <span class="unit">%</span>
+        </div>
+    </div>
+
+    <button class="calculate" onclick="calcular()">▶ Calcular producción</button>
+    <button class="clear" onclick="limpiar()">↻ Limpiar</button>
+
+</section>
+
+
+<!-- PANEL DERECHO -->
+<div class="right">
+
+<section class="card process">
+
+    <h2>🔬 Proceso de producción</h2>
+
+    <div class="process-area">
+
+        <div class="source">
+
+            <div class="source-item">
+                <div class="icon">☀️</div>
+                <div>
+                    <strong>Energía solar</strong>
+                    <small><span id="solarVisual">10</span> kW</small><br>
+                    <small id="solarDetalle" style="color:#9fb3c8;">20 × 450 Wp</small>
+                </div>
+            </div>
+
+            <div class="source-item">
+                <div class="icon">🌬️</div>
+                <div>
+                    <strong>Energía eólica</strong>
+                    <small><span id="eolicaVisual">5</span> kW</small><br>
+                    <small id="eolicaDetalle" style="color:#9fb3c8;">3 × 100 kW</small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="energy-box">
+            ⚡
+            <div>ENERGÍA RENOVABLE</div>
+            <div class="big"><span id="energiaVisual">15</span> kW</div>
+        </div>
+
+        <div class="electrolyzer">
+
+            <div class="electrolyzer-title">⚙️ ELECTROLIZADOR</div>
+
+            <div class="tanks">
+                <div class="tank"></div>
+                <div class="tank o2"></div>
+            </div>
+
+            <div class="water">💧 Agua (H₂O)</div>
+
+        </div>
+
+        <div class="gases">
+
+            <div class="gas">
+                <div class="gas-bubble">H₂</div>
+                <div>
+                    <strong>H₂</strong><br>
+                    <small>Hidrógeno</small>
+                </div>
+            </div>
+
+            <div class="gas o2">
+                <div class="gas-bubble">O₂</div>
+                <div>
+                    <strong>O₂</strong><br>
+                    <small>Oxígeno</small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="arrow a1"></div>
+        <div class="arrow a2"></div>
+
+    </div>
+
+    <div class="status">
+        <span id="statusDot" class="dot"></span>
+        <strong id="statusText">Electrolizador en espera</strong>
+        <strong style="margin-left:auto"><span id="uso">0</span>% de la energía utilizada</strong>
+    </div>
+
+    <div class="progress">
+        <div id="progressBar" class="progress-bar"></div>
+    </div>
+
+</section>
+
+
+<section class="card">
+
+    <h2>📊 Resultados</h2>
+
+    <div class="results-grid">
+
+        <div class="metric">
+            <div class="label">⚡ Potencia renovable total</div>
+            <div class="number"><span id="rPotencia">0</span> kW</div>
+        </div>
+
+        <div class="metric">
+            <div class="label">🔋 Energía disponible</div>
+            <div class="number"><span id="rEnergia">0</span> kWh</div>
+            <small id="rEnergiaFormula">P × t</small>
+        </div>
+
+        <div class="metric">
+            <div class="label">📄 Energía requerida</div>
+            <div class="number"><span id="rRequerida">0</span> kWh</div>
+            <small>para la producción calculada</small>
+        </div>
+
+        <div class="metric">
+            <div class="label">H₂ Producción de H₂</div>
+            <div class="number"><span id="rH2">0</span> kg</div>
+            <small>estimación del modelo</small>
+        </div>
+
+        <div class="metric">
+            <div class="label">🛡️ Eficiencia</div>
+            <div class="number"><span id="rEficiencia">0</span>%</div>
+        </div>
+
+        <div class="metric">
+            <div class="label">🕐 Tiempo de operación</div>
+            <div class="number"><span id="rHoras">0</span> h</div>
+        </div>
+
+    </div>
+
+    <div id="success" class="success">
+        Introduce los parámetros y pulsa <strong>Calcular producción</strong>.
+    </div>
+
+    <div class="formula">
+        m<sub>H₂</sub> = E / C<sub>esp</sub>
+        &nbsp;&nbsp; → &nbsp;&nbsp;
+        E = P × t
+    </div>
+
+</section>
+
+</div>
+</div>
+
+
+<section class="card footer-card">
+
+    <div>
+        <h3>💡 Sobre el consumo específico</h3>
+        <p>
+            El consumo específico representa cuánta energía eléctrica
+            necesita el electrolizador para producir 1 kg de H₂.
+            Si el valor ya incorpora las pérdidas y eficiencia,
+            no se vuelve a aplicar la eficiencia.
+        </p>
+    </div>
+
+    <div>
+        <h3>ⓘ Ecuación utilizada</h3>
+        <p>
+            P = potencia renovable (kW)<br>
+            t = horas de operación (h)<br>
+            C<sub>esp</sub> = consumo específico (kWh/kg H₂)
+        </p>
+    </div>
+
+    <div>
+        <h3>🌱 Hidrógeno verde</h3>
+        <p>
+            La Alpha representa la conversión conceptual de energía
+            renovable en hidrógeno mediante electrólisis.
+        </p>
+    </div>
+
+</section>
+
+</main>
+
+
+<script>
+function valor(id){
+    return parseFloat(document.getElementById(id).value) || 0;
+}
+
+function actualizarPotencia(){
+    const panelWp = valor("panelWp");
+    const panelCount = valor("panelCount");
+    const panelPR = valor("panelPR");
+
+    const turbineKw = valor("turbineKw");
+    const turbineCount = valor("turbineCount");
+    const turbineCF = valor("turbineCF");
+
+    // Banco solar: potencia pico instalada y potencia ajustada por rendimiento
+    const panelPico = (panelWp * panelCount) / 1000; // kWp
+    const solar = panelPico * (panelPR / 100); // kW ajustado
+
+    // Granja eólica: potencia nominal instalada y potencia ajustada por factor de capacidad
+    const turbineNominal = turbineKw * turbineCount; // kW
+    const eolica = turbineNominal * (turbineCF / 100); // kW ajustado
+
+    const total = solar + eolica;
+
+    document.getElementById("panelPico").textContent = panelPico.toFixed(1);
+    document.getElementById("solarTotal").textContent = solar.toFixed(1);
+    document.getElementById("turbineNominal").textContent = turbineNominal.toFixed(1);
+    document.getElementById("eolicaTotal").textContent = eolica.toFixed(1);
+    document.getElementById("potenciaTotal").textContent = total.toFixed(1);
+
+    document.getElementById("solarVisual").textContent = solar.toFixed(1);
+    document.getElementById("eolicaVisual").textContent = eolica.toFixed(1);
+    document.getElementById("energiaVisual").textContent = total.toFixed(1);
+
+    document.getElementById("solarDetalle").textContent =
+        panelCount.toFixed(0) + " × " + panelWp.toFixed(0) + " Wp";
+    document.getElementById("eolicaDetalle").textContent =
+        turbineCount.toFixed(0) + " × " + turbineKw.toFixed(0) + " kW";
+
+    document.getElementById("rPotencia").textContent = total.toFixed(1);
+
+    return {solar, eolica, total};
+}
+
+["panelWp","panelCount","panelPR","turbineKw","turbineCount","turbineCF"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", actualizarPotencia);
+});
+
+
+function calcular(){
+
+    const panelWp = valor("panelWp");
+    const panelCount = valor("panelCount");
+    const panelPR = valor("panelPR");
+    const turbineKw = valor("turbineKw");
+    const turbineCount = valor("turbineCount");
+    const turbineCF = valor("turbineCF");
+    const horas = valor("horas");
+    const consumo = valor("consumo");
+    const eficiencia = valor("eficiencia");
+
+    if(panelWp < 0 || panelCount < 0 || turbineKw < 0 || turbineCount < 0 || horas <= 0 || consumo <= 0){
+        alert("Verifica que los valores del banco solar, la granja eólica, las horas y el consumo sean válidos.");
+        return;
+    }
+
+    if(panelPR <= 0 || panelPR > 100 || turbineCF <= 0 || turbineCF > 100){
+        alert("El factor de rendimiento solar y el factor de capacidad eólico deben estar entre 1 % y 100 %.");
+        return;
+    }
+
+    if(eficiencia <= 0 || eficiencia > 100){
+        alert("La eficiencia debe estar entre 1 % y 100 %.");
+        return;
+    }
+
+    const { total: potencia } = actualizarPotencia();
+
+    if(potencia <= 0){
+        alert("La potencia renovable total debe ser mayor que 0. Revisa el banco solar y la granja eólica.");
+        return;
+    }
+
+    // Energía renovable disponible
+    const energiaDisponible = potencia * horas;
+
+    // Determinar si el consumo específico ya incorpora eficiencia
+    const incluye = document.querySelector('input[name="incluye"]:checked').value;
+
+    let energiaUtil = energiaDisponible;
+
+    if(incluye === "no"){
+        energiaUtil = energiaDisponible * (eficiencia / 100);
+    }
+
+    // Producción de hidrógeno
+    const h2 = energiaUtil / consumo;
+
+    // Energía efectivamente asociada a la producción calculada
+    const energiaRequerida = h2 * consumo;
+
+    // Porcentaje visual: eficiencia o aprovechamiento
+    const porcentaje = incluye === "si"
+        ? Math.min(100, (h2 * consumo / energiaDisponible) * 100)
+        : eficiencia;
+
+    document.getElementById("rPotencia").textContent = potencia.toFixed(1);
+    document.getElementById("rEnergia").textContent = energiaDisponible.toFixed(2);
+    document.getElementById("rEnergiaFormula").textContent =
+        potencia.toFixed(1) + " kW × " + horas.toFixed(1) + " h";
+
+    document.getElementById("rRequerida").textContent =
+        energiaRequerida.toFixed(2);
+
+    document.getElementById("rH2").textContent =
+        h2.toFixed(3);
+
+    document.getElementById("rEficiencia").textContent =
+        eficiencia.toFixed(0);
+
+    document.getElementById("rHoras").textContent =
+        horas.toFixed(1);
+
+    document.getElementById("uso").textContent =
+        porcentaje.toFixed(0);
+
+    document.getElementById("progressBar").style.width =
+        porcentaje + "%";
+
+    document.getElementById("statusDot").classList.add("active");
+
+    document.getElementById("statusText").textContent =
+        "Electrolizador en operación";
+
+    document.getElementById("success").innerHTML =
+        "Con los parámetros ingresados, el modelo estima una producción de " +
+        "<strong>" + h2.toFixed(3) +
+        " kg de H₂</strong> utilizando " +
+        "<strong>" + energiaDisponible.toFixed(2) +
+        " kWh</strong> de energía renovable.";
+
+    actualizarPotencia();
+}
+
+
+function limpiar(){
+
+    document.getElementById("panelWp").value = 450;
+    document.getElementById("panelCount").value = 0;
+    document.getElementById("panelPR").value = 80;
+    document.getElementById("turbineKw").value = 100;
+    document.getElementById("turbineCount").value = 0;
+    document.getElementById("turbineCF").value = 35;
+    document.getElementById("horas").value = 0;
+    document.getElementById("consumo").value = 50;
+    document.getElementById("eficiencia").value = 70;
+
+    document.querySelector('input[name="incluye"][value="si"]').checked = true;
+
+    document.getElementById("rPotencia").textContent = "0";
+    document.getElementById("rEnergia").textContent = "0";
+    document.getElementById("rRequerida").textContent = "0";
+    document.getElementById("rH2").textContent = "0";
+    document.getElementById("rEficiencia").textContent = "0";
+    document.getElementById("rHoras").textContent = "0";
+    document.getElementById("uso").textContent = "0";
+
+    document.getElementById("rEnergiaFormula").textContent = "P × t";
+    document.getElementById("progressBar").style.width = "0%";
+
+    document.getElementById("statusDot").classList.remove("active");
+    document.getElementById("statusText").textContent =
+        "Electrolizador en espera";
+
+    document.getElementById("success").innerHTML =
+        'Introduce los parámetros y pulsa <strong>Calcular producción</strong>.';
+
+    actualizarPotencia();
+}
+
+actualizarPotencia();
+</script>
+
+</body>
+</html>
