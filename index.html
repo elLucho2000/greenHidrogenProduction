@@ -553,6 +553,52 @@ button{
     .results-grid{grid-template-columns:1fr}
     .footer-card{grid-template-columns:1fr}
 }
+
+
+/* ── Asistente técnico Green Hydrogen ───────────────────────────── */
+#gh-chat-launcher{
+  position:fixed;right:22px;bottom:22px;z-index:9998;
+  width:62px;height:62px;border:0;border-radius:50%;
+  background:linear-gradient(135deg,#1769e0,#16a765);color:#fff;
+  font-size:27px;box-shadow:0 8px 24px rgba(18,48,95,.28);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+#gh-chat-launcher:focus-visible,#gh-chat-send:focus-visible,#gh-chat-close:focus-visible,
+#gh-chat-input:focus-visible{outline:3px solid #f0b429;outline-offset:3px}
+#gh-chat-panel{
+  position:fixed;right:22px;bottom:96px;z-index:9999;
+  width:min(390px,calc(100vw - 28px));height:min(560px,calc(100dvh - 125px));
+  min-height:360px;background:#fff;border:1px solid #cfe1f5;border-radius:18px;
+  box-shadow:0 14px 42px rgba(18,48,95,.24);display:none;overflow:hidden;
+  flex-direction:column;font-family:Arial,Helvetica,sans-serif;
+}
+#gh-chat-panel.gh-open{display:flex}
+.gh-chat-header{background:linear-gradient(120deg,#10294f,#215da8);color:#fff;
+  padding:14px 15px;display:flex;align-items:center;gap:10px}
+.gh-chat-avatar{width:38px;height:38px;border-radius:50%;background:#35d45d;
+  display:flex;align-items:center;justify-content:center;font-size:21px;flex:none}
+.gh-chat-heading{flex:1;min-width:0}
+.gh-chat-heading strong{display:block;font-size:14px}
+.gh-chat-heading span{display:block;font-size:11px;color:#dbe9ff;margin-top:3px}
+#gh-chat-close{border:0;background:transparent;color:#fff;font-size:25px;cursor:pointer;padding:2px 7px}
+#gh-chat-messages{flex:1;overflow-y:auto;padding:14px;background:#f4f8fc;display:flex;flex-direction:column;gap:10px}
+.gh-message{max-width:88%;padding:10px 12px;border-radius:13px;font-size:13px;line-height:1.5;
+  white-space:pre-wrap;overflow-wrap:anywhere}
+.gh-message.assistant{align-self:flex-start;background:#fff;border:1px solid #dce8f5;color:#183153;border-bottom-left-radius:4px}
+.gh-message.user{align-self:flex-end;background:#1769e0;color:#fff;border-bottom-right-radius:4px}
+.gh-message.error{border-color:#efc1c1;color:#9b2929}
+.gh-chat-compose{padding:11px;border-top:1px solid #e2ebf5;background:#fff;display:flex;gap:8px;align-items:flex-end}
+#gh-chat-input{flex:1;min-width:0;resize:none;max-height:100px;min-height:42px;padding:11px 12px;
+  border:1px solid #b9cde3;border-radius:11px;font:13px Arial,Helvetica,sans-serif;color:#183153}
+#gh-chat-send{height:42px;min-width:44px;border:0;border-radius:11px;background:#1769e0;color:#fff;
+  font-size:18px;cursor:pointer}
+#gh-chat-send:disabled{opacity:.55;cursor:wait}
+.gh-chat-note{font-size:10px;color:#71839a;padding:0 12px 9px;background:#fff}
+@media(max-width:600px){
+  #gh-chat-launcher{right:15px;bottom:15px;width:56px;height:56px}
+  #gh-chat-panel{right:10px;bottom:82px;width:calc(100vw - 20px);height:min(570px,calc(100dvh - 105px))}
+}
+
 </style>
 </head>
 
@@ -1182,6 +1228,25 @@ button{
 </main>
 
 
+<!-- Asistente técnico conectado mediante Cloudflare Worker -->
+<button id="gh-chat-launcher" type="button" aria-label="Abrir asistente técnico" aria-expanded="false" title="Consultar al asistente">✦</button>
+<section id="gh-chat-panel" role="dialog" aria-label="Asistente técnico de hidrógeno verde" aria-modal="false">
+  <header class="gh-chat-header">
+    <div class="gh-chat-avatar">⚡</div>
+    <div class="gh-chat-heading"><strong>Asistente energético</strong><span>Hidrógeno verde · DeepSeek</span></div>
+    <button id="gh-chat-close" type="button" aria-label="Cerrar asistente">×</button>
+  </header>
+  <div id="gh-chat-messages" aria-live="polite" aria-label="Conversación">
+    <div class="gh-message assistant">¡Hola! Soy el asistente técnico de Green Hydrogen Production. Puedes preguntarme sobre electrólisis, energía solar y eólica, integración renovable o dimensionamiento energético. ¿Qué te gustaría comprender?</div>
+  </div>
+  <form id="gh-chat-form" class="gh-chat-compose">
+    <textarea id="gh-chat-input" rows="1" maxlength="2000" placeholder="Escribe tu pregunta..." aria-label="Escribe tu pregunta"></textarea>
+    <button id="gh-chat-send" type="submit" aria-label="Enviar pregunta">➤</button>
+  </form>
+  <div class="gh-chat-note">Las respuestas son orientativas y deben contrastarse con datos técnicos del proyecto.</div>
+</section>
+
+
 <script>
 
 // ── Configuración de Google Apps Script ──────────────────────────────
@@ -1729,6 +1794,86 @@ async function generarInforme(){
         btn.textContent = "📄 Generar informe";
     }
 }
+
+
+// ── Asistente IA: comunicación segura a través del Cloudflare Worker ──
+(function iniciarAsistenteGreenHydrogen(){
+  const WORKER_URL = "https://green-hydrogen-assistant.diazlujsv2018.workers.dev";
+  const launcher = document.getElementById("gh-chat-launcher");
+  const panel = document.getElementById("gh-chat-panel");
+  const close = document.getElementById("gh-chat-close");
+  const form = document.getElementById("gh-chat-form");
+  const input = document.getElementById("gh-chat-input");
+  const send = document.getElementById("gh-chat-send");
+  const messagesBox = document.getElementById("gh-chat-messages");
+  const history = [];
+  let sending = false;
+
+  function toggleChat(open){
+    panel.classList.toggle("gh-open", open);
+    launcher.setAttribute("aria-expanded", String(open));
+    launcher.style.display = open ? "none" : "flex";
+    if(open) input.focus();
+  }
+  function addMessage(text, role, extraClass){
+    const node = document.createElement("div");
+    node.className = "gh-message " + role + (extraClass ? " " + extraClass : "");
+    node.textContent = text;
+    messagesBox.appendChild(node);
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+    return node;
+  }
+  launcher.addEventListener("click", () => toggleChat(true));
+  close.addEventListener("click", () => toggleChat(false));
+  input.addEventListener("keydown", event => {
+    if(event.key === "Enter" && !event.shiftKey){
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    const question = input.value.trim();
+    if(!question || sending) return;
+    if(question.length > 2000){
+      addMessage("La pregunta supera el límite de 2000 caracteres.", "assistant", "error");
+      return;
+    }
+    addMessage(question, "user");
+    input.value = "";
+    sending = true;
+    send.disabled = true;
+    send.textContent = "…";
+    const pending = addMessage("Estoy preparando una respuesta…", "assistant");
+    history.push({role:"user", content:question});
+    try{
+      const response = await fetch(WORKER_URL, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({messages:history.slice(-12)})
+      });
+      let data;
+      try { data = await response.json(); }
+      catch { throw new Error("El servidor devolvió una respuesta no válida."); }
+      if(!response.ok) throw new Error(data.error || "No fue posible consultar el asistente.");
+      if(typeof data.reply !== "string" || !data.reply.trim()) throw new Error("El asistente devolvió una respuesta vacía.");
+      pending.textContent = data.reply;
+      history.push({role:"assistant", content:data.reply});
+      if(history.length > 12) history.splice(0, history.length - 12);
+    }catch(error){
+      pending.textContent = "No pude conectar con el asistente. " + (error.message || "Comprueba tu conexión e inténtalo de nuevo.");
+      pending.classList.add("error");
+      // Retirar la pregunta fallida del historial para no enviarla repetidamente.
+      history.pop();
+    }finally{
+      sending = false;
+      send.disabled = false;
+      send.textContent = "➤";
+      input.focus();
+    }
+  });
+})();
+
 
 actualizarPotencia();
 aplicarTipo();
